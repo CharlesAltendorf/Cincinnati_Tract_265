@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <title>America's Migraine Hotsposts</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous" />
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+    integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,800;1,800&display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css?family=Cabin|Roboto:400,700|Roboto+Condensed:400,700" rel="stylesheet">
+  <style>
+    body {
+      background: #20282e;
+      font-family: "Cabin", sans-serif;
+      font-weight: 400;
+      font-size: 100%;
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      height: 3rem;
+    }
+
+    h1 {
+      font-weight: 800;
+    }
+
+    p {
+      line-height: 1.7rem;
+    }
+
+    #map {
+      /* height is set in JS */
+      background: #2d2f31;
+    }
+
+    .legend {
+      font-size: 1rem;
+      border-radius: 5px;
+      max-width: 200px;
+      font-family: "Open Sans", sans-serif;
+      background: rgba(100, 100, 100, 0.9);
+      color: rgba(244, 244, 244, 0.8);
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .legend h3 {
+      font-size: 1.1em;
+      font-weight: normal;
+      color: #ddd;
+      margin: 0 0 10px 0;
+    }
+
+    .legend span {
+      width: 20px;
+      height: 20px;
+      margin: 0 10px 4px 0;
+    }
+
+    .legend label {
+      font-size: 0.9rem;
+    }
+
+    .leaflet-bar a {
+      /* Override the default style for Leaflet's zoom  */
+      background: rgba(100, 100, 100, 0.9);
+      color: rgba(244, 244, 244, 0.8);
+    }
+
+    a:hover {
+      color: rgb(130, 131, 132);
+      text-decoration: none;
+    }
+
+    /* Custom Tool tips */
+    .leaflet-tooltip-own {
+      background: rgba(58, 58, 58, 0.955);
+      color: rgb(244, 244, 244);
+      border: none;
+      font-size: 1rem;
+      border-radius: 5px;
+      padding: 10px;
+      font-family: "Open Sans", sans-serif;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .leaflet-tooltip-left:before {
+      right: 0;
+      margin-right: -12px;
+      border-left-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .leaflet-tooltip-right:before {
+      left: 0;
+      margin-left: -12px;
+      border-right-color: rgba(0, 0, 0, 0.4);
+    }
+
+    /* Small devices (landscape phones, 576px and up) */
+    @media (min-width: 576px) {}
+    /* For small screens (phones and smaller devices) */
+    @media (max-width: 576px) {
+      h1 {
+        font-size: 1.5rem; /* Adjust to the desired size */
+        line-height: 1.2;  /* Adjust line spacing for readability */
+        margin: 0.5rem 0;  /* Add some spacing adjustments */
+      }
+
+      header .row {
+        text-align: center; /* Center align the content if needed */
+      }
+    }
+
+    /* Medium devices (tablets, 768px and up) */
+    @media (min-width: 768px) {}
+
+    /* Large devices (desktops, 992px and up) */
+    @media (min-width: 992px) {}
+
+    /* Extra large devices (large desktops, 1200px and up) */
+    @media (min-width: 1200px) {}
+  </style>
+</head>
+
+<body>
+  <div class="container-fluid">
+    <header class="row bg-dark text-white p-2">
+      <div class="col-8">
+        <h1>America's Migraine Hotspots</h1>
+      </div>
+      <div class="col-4 align-self-center">
+        <p class="d-flex justify-content-end my-auto">
+          <a class="btn btn-primary" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button"
+            aria-controls="offcanvasExample">
+            Map Info
+          </a>
+        </p>
+      </div>
+    </header>
+
+    <section class="row">
+      <div class="p-0">
+        <div id="map"></div>
+      </div>
+    </section>
+
+    <footer class="row bg-dark text-white p-2">
+      <p class="text-center"></p>
+    </footer>
+  </div>
+
+  <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="offcanvasExample"
+    aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasExampleLabel">Map Info</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <h3 class="py-2">America's Migraine Hotsposts</h3>
+      <p>
+        Metro boundaries were from cartographyvectors.com.  https://cartographyvectors.com/map/1296-us-metro-areas-2020.
+        Migraine data was collected from Sterling's Best Places 2006 study "America's Migraine Hotspots". https://www.bestplaces.net/docs/studies/migraines.aspx 
+        Data was then joined into the metros geojson to be displayed using leaflet. 
+        Percentages were calculated by dividing metro rankings by total number of metros
+        Note: Some metros had to be combined because sperling's 2006 metro defintions were different than 2020 ones.
+      </p>
+      <hr />
+      <ul class="list-unstyled">
+          <li>
+              Find me on GitHub @<a href="https://github.com/CharlesAltendorf">CharlesAltendorf</a>
+          </li>
+          <li>
+              Linkedin @<a href="https://www.linkedin.com/in/charles-altendorf/">Charles Altendorf</a>
+          </li>
+          <li>
+              Check out student maps @<a href="https://newmapsplus.github.io/projects/">NewMapsPlus</a>
+          </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- legend is outside of container-fluid and will be dynamically added to map -->
+  <div class="legend d-flex flex-column px-3 py-2" id="legend"></div>  
+
+  <!-- ui is outside of container-fluid and will be dynamically added to map -->
+  <div class="form-group me-3 mt-3" id="dropdown-ui">
+        <select class="form-control bg-primary text-white">
+            <option value="Rank" selected>Migraine Hotspot Percentile</option>
+        </select>
+  </div>
+
+  <!-- Add Bootstrap -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+    crossorigin="anonymous"></script>
+  <!-- then Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+    integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+  <!-- then Simple Statistics -->
+  <script src="https://unpkg.com/simple-statistics@7.8.3/dist/simple-statistics.min.js"></script>
+  <script>
+    // Add footer date
+    setDate()
+
+    // set global variables for header, map container, and footer
+    const header = document.querySelector("header");
+    const mapContainer = document.querySelector("#map");
+    const footer = document.querySelector("footer");
+
+    // set map height to fill window
+    mapContainer.style.height =
+      window.innerHeight - header.offsetHeight - footer.offsetHeight + "px";
+
+    // initial Leaflet map options
+    //const options = {
+      //center: [37.8, -85.8],
+      //zoom: 7.4,
+      //zoomSnap: 0.1,
+      //zoomControl: false,
+      //attributionControl: false,
+    //};
+    const options = {
+      zoomSnap: 0.1,
+      center: [40, -90],
+      zoom: 4,
+      zoomControl: false,
+    };
+
+    // create Leaflet map and apply options
+    const map = L.map("map", options);
+    new L.control.zoom({ position: "bottomright" }).addTo(map)
+
+    // request a basemap tile layer and add to the map
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
+
+    // set global variables for map layer,
+    // mapped attribute, and normalizing attribute
+    let attributeValue = "Rank";
+    const normValue = "Total";
+
+    //create object to hold legend titles
+    const labels = {
+      Rank: "Migraine Hotspot Percentile",
+    };
+
+    // fetch data
+    fetch("data/us-metro-areas-2020_1296.geojson")
+      // after it is returned...
+      .then(function (response) {
+        // Parse the JSON into a useable format, then return it
+        return response.json();
+      })
+      // The returned response is now data in a new then method
+      .then(function (data) {
+        // This is the JSON from our response
+        console.log(data);
+        // call draw map and send data as parameter
+        drawMap(data);
+        // Return a new fetch call and continue the chain
+        return fetch("data/us_states_20m.geojson")
+      })
+      .then(function (response) {
+          return response.json()
+        })
+        .then(function (data) {
+          drawAnotherLayer(data)
+        })
+      // If there is an error, log it to the console
+      .catch(function (error) {
+        console.log(error);
+      });
+
+    // Example of keeping your page fresh
+    function setDate() {
+      const date = new Date();
+      const year = date.getFullYear();
+      const month = date.toLocaleString('default', { month: 'long' });
+      const footerText = document.querySelector("footer p");
+      footerText.innerHTML = `${month}, ${year} | Dedicated to Wendy Altendorf`;
+    }
+
+    function drawMap(data) {
+      console.log(data); // data is now accessible here
+      //const counties = L.geoJson(data).addTo(map);
+      // create Leaflet data layer and add to map
+      const counties = L.geoJson(data, {
+      // style counties with initial default path options
+      style: function (feature) {
+      return {
+        color: "#20282e",
+        weight: 2,
+        fillOpacity: 1,
+        fillColor: "#1f78b4",
+        };
+      },
+      // add hover/touch functionality to each feature layer
+      onEachFeature: function (feature, layer) {
+      // when mousing over a layer
+      layer.on("mouseover", function () {
+        // change the stroke color and bring that element to the front
+        layer
+          .setStyle({
+            color: "#ff6e00",
+          })
+          .bringToFront();
+      });
+
+      // on mousing off layer
+      layer.on("mouseout", function () {
+        // reset the layer style to its original stroke color
+        layer.setStyle({
+            color: "#20282e",
+          });
+        });
+        },
+      }).addTo(map);
+      updateMap(counties);
+      //addUi(counties);
+     }
+
+    function updateMap(counties) {
+      // you could log counties to console here to
+      // verify the Leaflet layers object is not accessible
+      // and scoped within this function
+      console.log(counties);
+
+      // get the class breaks for the current data attribute
+      const breaks = getClassBreaks(counties);
+
+      // loop through each county layer to update the color and tooltip info
+      counties.eachLayer(function (layer) {
+        const props = layer.feature.properties;
+        
+        // set the fill color of layer based on its normalized data value
+        layer.setStyle({
+          fillColor: getColor(props[attributeValue] / props[normValue], breaks),
+        });
+
+      // assemble string sequence of info for tooltip (end line break with + operator)
+      let tooltipInfo = `<b>${props["NAME"]}</b></br>
+      ${((props[attributeValue] / props[normValue]) * 100).toLocaleString()}%`;
+
+      // bind a tooltip to layer with county-specific information
+      layer.bindTooltip(tooltipInfo, {
+        // sticky property so tooltip follows the mouse
+        sticky: true,
+      });
+    });
+
+    // update the legend with the current data attribute information
+    addLegend(breaks);      
+    }
+
+    // Get class breaks in data
+    function getClassBreaks(counties) {
+      // create empty Array for storing values
+      const values = [];
+
+      // loop through all the counties
+      counties.eachLayer(function (layer) {
+        let value =
+          layer.feature.properties[attributeValue] /
+          layer.feature.properties[normValue];
+          values.push(value); // push the normalized value for each layer into the Array
+        });
+
+    // determine similar clusters
+    const clusters = ss.ckmeans(values, 5);
+
+    // create an array of the lowest value within each cluster
+    const breaks = clusters.map(function (cluster) {
+        return [cluster[0], cluster.pop()];
+      });
+
+    //return array of arrays, e.g., [[0.24,0.25], [0.26, 0.37], etc]
+    return breaks;
+    }
+
+    function getColor(d, breaks) {
+      if (d <= breaks[0][1]) {
+        return "#feedde";
+      } else if (d <= breaks[1][1]) {
+        return "#fdbe85";
+      } else if (d <= breaks[2][1]) {
+        return "#fd8d3c";
+      } else if (d <= breaks[3][1]) {
+        return "#e6550d";
+      } else if (d <= breaks[4][1]) {
+        return "#a63603";
+      }
+     }
+
+    function addLegend(breaks) {
+      // check your console to verify the breaks array
+      console.log(breaks);
+
+      // create a new Leaflet control object, and position it top left
+      const legendControl = L.control({ position: "topleft" });
+
+      // when the legend is added to the map
+      legendControl.onAdd = function () {
+        // select a div element with an id attribute of legend
+        const legend = L.DomUtil.get("legend");
+
+        // disable scroll and click/touch on map when on legend
+        L.DomEvent.disableScrollPropagation(legend);
+        L.DomEvent.disableClickPropagation(legend);
+
+        // return the selection to the method
+        return legend;
+      };
+
+      // add the empty legend div to the map
+      legendControl.addTo(map);
+      updateLegend(breaks);
+    }
+
+    function updateLegend(breaks) { 
+      // select the legend, add a title, begin an unordered list and assign to a variable
+      const legend = document.querySelector("#legend")
+      legend.innerHTML = `<h5>${labels[attributeValue]}</h5>`;
+
+      // loop through the Array of classification break values
+      for (let i = 0; i <= breaks.length - 1; i++) {
+        let color = getColor(breaks[i][0], breaks);
+
+        legend.innerHTML +=
+          `<div class="d-flex flex-row justify-content-start">
+            <span style="background:${color}"></span>
+            <label>${(breaks[i][0] * 100).toFixed(1)} &mdash;
+            ${(breaks[i][1] * 100).toFixed(1)}%</label>
+          </div>`
+     }
+    }
+
+    function addUi(counties) {
+      // create the slider control
+      var selectControl = L.control({ position: "topright" });
+
+      // when control is added
+      selectControl.onAdd = function () {
+        // get the element with id attribute of ui-controls
+        return L.DomUtil.get("dropdown-ui");
+      };
+      // add the control to the map
+      selectControl.addTo(map);
+      const dropdown = document.querySelector('#dropdown-ui select')
+      dropdown.addEventListener('change', function (e) {
+
+      // code executed here when change event occurs
+      console.log(`Something changed at ${Date.now()}`);
+
+      // see what this event captures
+      console.log(e);
+
+      // get the value of the selected option
+      attributeValue = e.target.value;
+
+      // update the map
+      updateMap(counties);
+
+      });
+    }
+      function drawAnotherLayer(data) {
+        const bounds = L.latLngBounds();
+        L.geoJson(data, {
+          style: function (feature) {
+            return {
+              color: "#808080",
+              // Make line weight larger than the county outline
+              weight: 2,
+              fillOpacity: 0,
+              // This property allows us control interactivity of layer
+              interactive: false,
+            };
+          },
+          onEachFeature: function (feature, layer) {
+            if (feature.properties.NAME === "Washington" || feature.properties.NAME === "Maine") {
+              // Add the bounds of each feature to the bounds variable
+              bounds.extend(layer.getBounds());
+            }
+            
+          },
+        }).addTo(map);
+      }
+
+
+
+
+
+  </script>
+</body>
+
+</html>
