@@ -257,7 +257,7 @@
     };
 
     // fetch data
-    fetch("data/developments.geojson")
+    fetch("./data/developments.geojson")
       // after it is returned...
       .then(function (response) {
         // Parse the JSON into a useable format, then return it
@@ -270,7 +270,7 @@
         // call draw map and send data as parameter
         drawMap(data);
         // Return a new fetch call and continue the chain
-        return fetch("data/Tract265.geojson")
+        return fetch("./data/Tract265.geojson")
       })
       .then(function (response) {
           return response.json()
