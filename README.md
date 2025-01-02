@@ -14,7 +14,8 @@ Univerisity of Kentucky New Maps Plus Master's of Science Student
 ### Cincinnati Census Tract 265 Boundary.  
 https://www2.census.gov/geo/tiger/TGRGDB22/
 ### Cincinnati Census Citywide and Tract 265 Population Growth.
-https://data.cincinnati.com/census/total-population/total-population-change/census-tract-265-hamilton-county-ohio/140-39061026500/
+https://data.census.gov/table/DECENNIALPL2010.P1?g=050XX00US39061$1400000
+https://data.census.gov/table/DECENNIALPL2020.P1?g=050XX00US39061$1400000
 ### Building Footprints used to help create Geojson.
 https://data-cagisportal.opendata.arcgis.com/datasets/c16cf953e9f24695b8b202219b300bcc_6/explore
 ### Downtown Cincinnati Page used to find out about recent developments.
