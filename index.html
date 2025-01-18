@@ -248,12 +248,13 @@
 
     // set global variables for map layer,
     // mapped attribute, and normalizing attribute
-    let attributeValue = "Rank";
-    const normValue = "Total";
+    //code generated with assitance from ChatGPT 1/18/2025
+    let attributeValue = "Year";
+    //const normValue = "Total";
 
     //create object to hold legend titles
     const labels = {
-      Rank: "Recency Percentile of Developments",
+      Year: "year",
     };
 
     // fetch data
@@ -346,7 +347,7 @@
         
         // set the fill color of layer based on its normalized data value
         layer.setStyle({
-          fillColor: getColor(props[attributeValue] / props[normValue], breaks),
+          fillColor: getColor(props[attributeValue], breaks),
         });
 
       // assemble string sequence of info for tooltip (end line break with + operator)
@@ -368,41 +369,61 @@
     }
 
     // Get class breaks in data
+    //code generated with help from ChatGPT 1/18/2025
     function getClassBreaks(counties) {
-      // create empty Array for storing values
-      const values = [];
-
-      // loop through all the counties
+      // get unique years from the data
+      const years = [];
       counties.eachLayer(function (layer) {
-        let value =
-          layer.feature.properties[attributeValue] /
-          layer.feature.properties[normValue];
-          values.push(value); // push the normalized value for each layer into the Array
+        const year = layer.feature.properties[attributeValue];
+        if (!years.includes(year)) {
+          years.push(year); // Add unique years to the array
+        }
         });
 
-    // determine similar clusters
-    const clusters = ss.ckmeans(values, 5);
+    // Sort the year in ascending order (if nor already sorted)
+    years.sort();
 
-    // create an array of the lowest value within each cluster
-    const breaks = clusters.map(function (cluster) {
-        return [cluster[0], cluster.pop()];
-      });
+    // Assign a class break for each year
+    const breaks = years.map(year => [year, year]);
 
-    //return array of arrays, e.g., [[0.24,0.25], [0.26, 0.37], etc]
     return breaks;
     }
 
     function getColor(d, breaks) {
-      if (d <= breaks[0][1]) {
-        return "#feedde";
-      } else if (d <= breaks[1][1]) {
-        return "#fdbe85";
-      } else if (d <= breaks[2][1]) {
-        return "#fd8d3c";
-      } else if (d <= breaks[3][1]) {
-        return "#e6550d";
-      } else if (d <= breaks[4][1]) {
-        return "#a63603";
+      switch (String(d)) {
+        case "2010":
+          return "#fff5eb";
+        case "2011":
+          return "#feeddb";
+        case "2012":
+          return "#fee4ca";
+        case "2013":
+          return "#fdd8b1";
+        case "2014":
+          return "#fdc997";
+        case "2015":
+          return "#fdb779";
+        case "2016":
+          return "#fda45d";
+        case "2017":
+          return "#fd9243";
+        case "2018":
+          return "#f87f2c";
+        case "2019":
+          return "#f26b15";
+        case "2020":
+          return "#e5590a";
+        case "2021":
+          return "#d74701";
+        case "2022":
+          return "#b83c02";
+        case "2023":
+          return "#9b3203";
+        case "2024":
+          return "#7f2704";
+        // add more years and colors as needed
+        default:
+          return "#FFFFFF";
       }
      }
 
@@ -431,22 +452,21 @@
       updateLegend(breaks);
     }
 
+    //code generated with assitance from ChatGPT 1/18/2025
     function updateLegend(breaks) { 
-      // select the legend, add a title, begin an unordered list and assign to a variable
       const legend = document.querySelector("#legend")
-      legend.innerHTML = `<h5>${labels[attributeValue]}</h5>`;
+      legend.innerHTML = `<h5>Year of Development</h5>`; //Change title
 
       // loop through the Array of classification break values
-      for (let i = 0; i <= breaks.length - 1; i++) {
-        let color = getColor(breaks[i][0], breaks);
+      breaks.forEach(function (breakRange) {
+        let color = getColor(breakRange[0], breaks); //Get color
 
         legend.innerHTML +=
           `<div class="d-flex flex-row justify-content-start">
             <span style="background:${color}"></span>
-            <label>${(breaks[i][0] * 100).toFixed(1)} &mdash;
-            ${(breaks[i][1] * 100).toFixed(1)}%</label>
-          </div>`
-     }
+            <label>${breakRange[0]}</label>
+          </div>`;
+     });
     }
 
     function addUi(counties) {
